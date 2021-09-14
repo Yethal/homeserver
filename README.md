@@ -14,7 +14,7 @@ Additionally, following auxiliary containers are included:
 * MariaDB (database for Nextcloud)
 
 ### Deployment guide
-1. Install docker and docker-ompose on your server
+1. Install docker and docker-compose on your server
 1. Clone this repository
 1. Create a file named .env in the same directory as docker-compose.yml file
 1. Add following environment variables to the files:
