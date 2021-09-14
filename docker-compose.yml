@@ -1,0 +1,165 @@
+version: '3.7'
+services:
+  roon:
+    image: steefdebruijn/docker-roonserver:latest
+    volumes:
+       - roon-app:/app
+       - roon-data:/data
+       - /tank/media/music:/music
+       - /tank/media/backups/roon:/backup
+    container_name: roon-server
+    network_mode: "host"
+    restart: always
+    devices:
+      - '/dev/bus/usb:/dev/bus/usb'
+    environment:
+       - TZ='Europe/Warsaw'
+       - PUID=1000
+       - PGID=1000
+  plex:
+    image: ghcr.io/linuxserver/plex
+    container_name: plex
+    hostname: plex
+    labels:
+      swag: "enable"
+    environment:
+      - TZ='Europe/Warsaw'
+      - HOSTNAME='node304'
+      - PUID=1000
+      - PGID=1000
+      - VERSION=docker
+    volumes:
+      - /tank/media/tvshows:/tvshows
+      - /tank/media/movies:/movies
+      - plex-data:/config
+      - /tank/media/backups/plex:/backup
+#    devices:
+#      - '/dev/dri:/dev/dri'
+    restart: always
+    ports:
+      - 32400:32400
+      - 1900:1900/udp
+      - 32410:32410
+      - 32412:32412
+      - 32413:32413
+      - 32414:32414
+      - 3005:3005
+      - 5353:5353/udp
+      - 8324:8324
+      - 32469:32469
+  transmission:
+    image: linuxserver/transmission
+    container_name: transmission
+    labels:
+      swag: "enable"
+    environment:
+      - PUID=1000
+      - GUID=1000
+      - TZ='Europe/Warsaw'
+    volumes:
+      - transmission-data:/config
+      - /tank/media/downloads:/downloads
+    restart: always
+  netbootxyz:
+    image: ghcr.io/linuxserver/netbootxyz
+    container_name: netboot
+    labels:
+      swag: "enable"
+    environment:
+      - DHCP_RANGE_START=192.168.1.2
+    ports:
+      - 69:69/udp
+      - 8000:80
+    volumes:
+      - netboot-config:/config
+    restart: unless-stopped
+  unifi-controller:
+    image: ghcr.io/linuxserver/unifi-controller
+    container_name: unifi-controller
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - MEM_LIMIT=1024M #optional
+      - MEM_STARTUP=1024M #optional
+    volumes:
+      - unifi-data:/config
+    ports:
+      - 3478:3478/udp
+      - 10001:10001/udp
+      - 8080:8080
+      - 8443:8443
+      - 8843:8843 #optional
+      - 8880:8880 #optional
+      - 6789:6789 #optional
+      - 5514:5514/udp #optional
+    restart: unless-stopped
+  nextcloud:
+    image: ghcr.io/linuxserver/nextcloud
+    container_name: nextcloud
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - MYSQL_HOST=db
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - nextcloud-config:/config
+      - /tank/nextcloud:/data
+    restart: unless-stopped
+    links:
+      - db
+  db:
+    image: mariadb:10.5
+    container_name: mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+    volumes:
+      - mariadb-data:/var/lib/mysql
+  swag:
+    image: ghcr.io/linuxserver/swag
+    container_name: swag
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Warsaw
+      - URL=${URL}
+      - SUBDOMAINS=wildcard
+      - VALIDATION=dns
+      - DNSPLUGIN=${DNSPLUGIN}
+      - EMAIL=${EMAIL}
+      - DOCKER_MODS=linuxserver/mods:swag-auto-reload|linuxserver/mods:swag-auto-proxy|linuxserver/mods:universal-docker
+      - DOCKER_HOST=dockerproxy
+    volumes:
+      - /home/ubuntu/swag-config:/config
+    ports:
+      - 443:443
+      - 80:80
+    restart: always
+  dockerproxy:
+    image: ghcr.io/tecnativa/docker-socket-proxy:latest
+    container_name: dockerproxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    environment:
+      - CONTAINERS=1
+      - POST=0
+volumes:
+  roon-app:
+  roon-data:
+  plex-data:
+  transmission-data:
+  netboot-config:
+  unifi-data:
+  nextcloud-config:
+  mariadb-data:
+  swag-config:
