@@ -139,7 +139,7 @@ services:
       - DOCKER_MODS=linuxserver/mods:swag-auto-reload|linuxserver/mods:swag-auto-proxy|linuxserver/mods:universal-docker
       - DOCKER_HOST=dockerproxy
     volumes:
-      - /home/ubuntu/swag-config:/config
+      - swag-config:/config
     ports:
       - 443:443
       - 80:80
