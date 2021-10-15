@@ -23,7 +23,7 @@ services:
       swag: 'enable'
     environment:
       - TZ=${TZ}
-      - HOSTNAME='${hostname}'
+      - HOSTNAME=${hostname}
       - PUID=${PUID}
       - PGID=${PGID}
       - VERSION=latest
