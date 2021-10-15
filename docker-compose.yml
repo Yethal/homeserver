@@ -8,54 +8,50 @@ services:
        - /tank/media/music:/music
        - /tank/media/backups/roon:/backup
     container_name: roon-server
-    network_mode: "host"
+    network_mode: 'host'
     restart: always
     devices:
-      - '/dev/bus/usb:/dev/bus/usb'
     environment:
-       - TZ='Europe/Warsaw'
-       - PUID=1000
-       - PGID=1000
+       - TZ=${TZ}
+       - PUID=${PUID}
+       - PGID=${PGID}
   plex:
     image: ghcr.io/linuxserver/plex
     container_name: plex
     hostname: plex
     labels:
-      swag: "enable"
+      swag: 'enable'
     environment:
-      - TZ='Europe/Warsaw'
-      - HOSTNAME='node304'
-      - PUID=1000
-      - PGID=1000
-      - VERSION=docker
+      - TZ=${TZ}
+      - HOSTNAME='${hostname}'
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - VERSION=latest
     volumes:
       - /tank/media/tvshows:/tvshows
       - /tank/media/movies:/movies
       - plex-data:/config
       - /tank/media/backups/plex:/backup
-#    devices:
-#      - '/dev/dri:/dev/dri'
     restart: always
     ports:
-      - 32400:32400
       - 1900:1900/udp
-      - 32410:32410
-      - 32412:32412
-      - 32413:32413
-      - 32414:32414
       - 3005:3005
       - 5353:5353/udp
       - 8324:8324
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
       - 32469:32469
   transmission:
     image: linuxserver/transmission
     container_name: transmission
     labels:
-      swag: "enable"
+      swag: 'enable'
     environment:
-      - PUID=1000
-      - GUID=1000
-      - TZ='Europe/Warsaw'
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     volumes:
       - transmission-data:/config
       - /tank/media/downloads:/downloads
@@ -64,7 +60,7 @@ services:
     image: ghcr.io/linuxserver/netbootxyz
     container_name: netboot
     labels:
-      swag: "enable"
+      swag: 'enable'
     environment:
       - DHCP_RANGE_START=192.168.1.2
     ports:
@@ -74,11 +70,11 @@ services:
       - netboot-config:/config
     restart: unless-stopped
   unifi-controller:
-    image: ghcr.io/linuxserver/unifi-controller
+    image: ghcr.io/linuxserver/unifi-controller:latest
     container_name: unifi-controller
     environment:
-      - PUID=1000
-      - PGID=1000
+      - PUID=${PUID}
+      - PGID=${PGID}
       - MEM_LIMIT=1024M #optional
       - MEM_STARTUP=1024M #optional
     volumes:
@@ -87,9 +83,6 @@ services:
       - 3478:3478/udp
       - 10001:10001/udp
       - 8080:8080
-      - 8443:8443
-      - 8843:8843 #optional
-      - 8880:8880 #optional
       - 6789:6789 #optional
       - 5514:5514/udp #optional
     restart: unless-stopped
@@ -97,9 +90,9 @@ services:
     image: ghcr.io/linuxserver/nextcloud
     container_name: nextcloud
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/London
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
       - MYSQL_HOST=db
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
@@ -128,8 +121,8 @@ services:
     cap_add:
       - NET_ADMIN
     environment:
-      - PUID=1000
-      - PGID=1000
+      - PUID=${PUID}
+      - PGID=${PGID}
       - TZ=Europe/Warsaw
       - URL=${URL}
       - SUBDOMAINS=wildcard
@@ -139,7 +132,7 @@ services:
       - DOCKER_MODS=linuxserver/mods:swag-auto-reload|linuxserver/mods:swag-auto-proxy|linuxserver/mods:universal-docker
       - DOCKER_HOST=dockerproxy
     volumes:
-      - swag-config:/config
+      - /home/ubuntu/swag-config:/config
     ports:
       - 443:443
       - 80:80
@@ -153,6 +146,11 @@ services:
     environment:
       - CONTAINERS=1
       - POST=0
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    volumes:
+      - vw-data:/data
 volumes:
   roon-app:
   roon-data:
@@ -163,3 +161,4 @@ volumes:
   nextcloud-config:
   mariadb-data:
   swag-config:
+  vw-data:
