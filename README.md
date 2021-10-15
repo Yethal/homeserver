@@ -16,14 +16,6 @@ Additionally, following auxiliary containers are included:
 ### Deployment guide
 1. Install docker and docker-compose on your server
 1. Clone this repository
-1. Create a file named .env in the same directory as docker-compose.yml file
-1. Add following environment variables to the files:
-    * MYSQL_ROOT_PASSWORD
-    * MYSQL_PASSWORD
-    * MYSQL_DATABASE
-    * MYSQL_USER
-    * URL
-    * EMAIL
-    * DNSPLUGIN
+1. Fill the .env file with necessary variables
 1. Adjust volume mappings in the compose file to match your directory structure
 1. Run `sudo docker-compose up -d`
